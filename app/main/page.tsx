@@ -27,6 +27,13 @@ export default function Main() {
       >
         Lista de Qr
       </Button>
+      <Button
+        onClick={() => {
+          router.push("cameraCapture");
+        }}
+      >
+        Qr desde cámara
+      </Button>
     </div>
   );
 }
