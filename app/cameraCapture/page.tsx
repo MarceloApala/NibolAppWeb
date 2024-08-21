@@ -1,65 +1,167 @@
-'use client';
-import React, { useRef, useState, useCallback, useEffect } from 'react';
-import Webcam from 'react-webcam';
-import jsQR from 'jsqr';
+"use client";
+import React, { useRef, useState, useCallback, useEffect } from "react";
+import Webcam from "react-webcam";
+import jsQR from "jsqr";
+import { Button } from "@/components/ui/button";
 
 const videoConstraints = {
   width: 400,
   height: 400,
-  facingMode: 'environment',
+  facingMode: "environment",
 };
 
 const QRCodeScanner: React.FC = () => {
   const [qrCode, setQrCode] = useState<string | null>(null);
+  const [cameraActive, setCameraActive] = useState<boolean>(false);
+  const [inputValue, setInputValue] = useState<string>("");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
   const webcamRef = useRef<Webcam | null>(null);
 
   const capture = useCallback(() => {
-    if (webcamRef.current) {
+    if (webcamRef.current && cameraActive) {
       const imageSrc = webcamRef.current.getScreenshot();
       if (imageSrc) {
-        const img = document.createElement('img');
+        const img = document.createElement("img");
         img.src = imageSrc;
         img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d');
+          const canvas = document.createElement("canvas");
+          const context = canvas.getContext("2d");
           if (context) {
             canvas.height = img.height;
             canvas.width = img.width;
             context.drawImage(img, 0, 0, img.width, img.height);
-            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            const imageData = context.getImageData(
+              0,
+              0,
+              canvas.width,
+              canvas.height
+            );
             const code = jsQR(imageData.data, canvas.width, canvas.height, {
-              inversionAttempts: 'dontInvert',
+              inversionAttempts: "dontInvert",
             });
             if (code) {
               setQrCode(code.data);
+              const parsedData = JSON.parse(code.data);
+              setInputValue(parsedData.chasis || "");
             } else {
-              setQrCode('No QR code detected');
+              setQrCode("No QR code detected");
             }
           }
         };
       }
     }
-  }, [webcamRef]);
+  }, [webcamRef, cameraActive]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      capture();
-    }, 1000); // Scan every second
+    if (cameraActive) {
+      const interval = setInterval(() => {
+        capture();
+      }, 1000); // Scan every second
 
-    return () => clearInterval(interval);
-  }, [capture]);
+      return () => clearInterval(interval);
+    }
+  }, [capture, cameraActive]);
+
+  const toggleCamera = () => {
+    setCameraActive(!cameraActive);
+  };
+
+  const handleSave = () => {
+    if (latitude && longitude) {
+      const currentDate = new Date();
+      const fecha_sistema = currentDate.toISOString().split("T")[0]; // Solo la fecha en formato YYYY-MM-DD
+      const hora_sistema = currentDate.toTimeString().split(" ")[0]; // Hora en formato HH:MM:SS
+
+      const data = {
+        fecha_sistema, // Fecha en formato "YYYY-MM-DD"
+        hora_sistema, // Hora en formato "HH:MM:SS"
+        latitud: latitude,
+        longitud: longitude,
+        chasis: inputValue,
+      };
+
+      fetch("https://apprest3.onrender.com/api/ubicacion", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
+        .then((response) => response.json())
+        .then((result) => {
+          console.log("Datos guardados exitosamente:", result);
+          alert("Datos guardados exitosamente.");
+        })
+        .catch((error) => {
+          console.error("Error al guardar los datos:", error);
+          alert("Error al intentar guardar los datos.");
+        });
+    } else {
+      console.error("No se pudieron obtener las coordenadas.");
+      alert("No se pudieron obtener las coordenadas.");
+    }
+  };
+
+  const handleGetLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          setLatitude(lat);
+          setLongitude(lng);
+        },
+        (error) => {
+          console.error("Error al obtener la ubicación:", error);
+          alert("Error al obtener la ubicación.");
+        }
+      );
+    } else {
+      console.error("La geolocalización no es soportada por este navegador.");
+      alert("La geolocalización no es soportada por este navegador.");
+    }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <Webcam
-        audio={false}
-        ref={webcamRef}
-        screenshotFormat="image/jpeg"
-        videoConstraints={videoConstraints}
-      />
+      {cameraActive && (
+        <Webcam
+          audio={false}
+          ref={webcamRef}
+          screenshotFormat="image/jpeg"
+          videoConstraints={videoConstraints}
+        />
+      )}
       <div className="mt-4">
-        <p>{qrCode ? `QR Code Data: ${qrCode}` : 'No QR code detected'}</p>
+        <p>{qrCode ? `QR Code Data: ${qrCode}` : "No QR code detected"}</p>
       </div>
+
+      <input
+        type="text"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        placeholder="Ingrese el chasis"
+        className="mt-4 p-2 border border-gray-300 rounded"
+      />
+      <Button onClick={toggleCamera} className="mt-4">
+        {cameraActive ? "Desactivar Cámara" : "Activar Cámara"}
+      </Button>
+
+      <Button onClick={handleGetLocation} className="mt-4">
+        Obtener Ubicación
+      </Button>
+
+      {latitude && longitude && (
+        <div className="mt-4">
+          <p>Latitud: {latitude}</p>
+          <p>Longitud: {longitude}</p>
+        </div>
+      )}
+
+      <Button onClick={handleSave} className="mt-4">
+        Guardar
+      </Button>
     </div>
   );
 };

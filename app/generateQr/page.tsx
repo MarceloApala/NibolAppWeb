@@ -11,12 +11,12 @@ export default function GenerateQr() {
   const [qrBase64, setQrBase64] = useState<string>("");
 
   const vehicleData = {
-    make: "Lexus",
-    model: "RX 350",
+    make: "Volvo",
+    model: "XC90",
     year: 2021,
-    color: "White",
+    color: "Black",
     engine: "",
-    transmission: "Manual",
+    transmission: "Automatic",
   };
 
   const generateQRCode = () => {
