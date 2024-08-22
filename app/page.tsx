@@ -37,47 +37,53 @@ export default function Home() {
       values.username === harcodedUsername &&
       values.password === harcodePassword
     ) {
-      alert("Login success");
       router.push("/main");
     } else {
-      alert("Login failed");
+      alert("Usuario o contraseña incorrectos");
     }
   }
   return (
-    <div className="flex h-screen w-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md p-8 bg-white shadow-md rounded">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Username</FormLabel>
-                  <FormControl>
-                    <Input placeholder="username" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input placeholder="password" type="password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit">Submit</Button>
-          </form>
-        </Form>
-      </div>
+    <div className="flex h-screen w-screen items-center justify-center">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="flex justify-center w-full" style={{width:'100%'}}>
+          <p>
+            <strong>NIBOL</strong>
+          </p>
+        </div>
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Usuario</FormLabel>
+                <FormControl>
+                  <Input placeholder="" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Contraseña</FormLabel>
+                <FormControl>
+                  <Input placeholder="" type="password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="flex justify-center">
+            <Button type="submit" style={{ width: "100%" }}>
+              Iniciar
+            </Button>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 }
