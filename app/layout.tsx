@@ -26,6 +26,16 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
+        <div className="max-w-screen-xl flex flex-col md:flex-row items-center justify-between mx-auto p-4">
+          <img
+            src="https://www.nibol.com.bo/wp-content/uploads/2022/06/logo-nibol-negro-ok1.png"
+            alt="Nibol"
+            className="mr-4"
+          />
+          <div className="flex text-center">
+            <p className="text-lg font-bold">NIBOL</p>
+          </div>
+        </div>
         {children}
       </body>
     </html>

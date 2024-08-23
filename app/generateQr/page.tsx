@@ -137,8 +137,8 @@ export default function GenerateQr() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <h1>Generar QR</h1>
+    <div className="flex flex-col items-center mt-10">
+      <p className="mb-4"><strong>Generar QR</strong></p>
       <div className="flex mb-4">
         <Input
           value={chasis}

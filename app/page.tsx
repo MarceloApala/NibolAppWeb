@@ -43,14 +43,14 @@ export default function Home() {
     }
   }
   return (
-    <div className="flex h-screen w-screen items-center justify-center">
+    <div className="flex  w-screen mt-20 justify-center">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="flex justify-center w-full" style={{width:'100%'}}>
-          <p>
-            <strong>NIBOL</strong>
-          </p>
-        </div>
+          <div className="flex justify-center w-full" style={{ width: "100%" }}>
+            <p>
+              <strong>Iniciar Sesion </strong>
+            </p>
+          </div>
           <FormField
             control={form.control}
             name="username"

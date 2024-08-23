@@ -8,20 +8,11 @@ export default function Main() {
 
   return (
     <div>
-      <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-        <img
-          src="https://www.nibol.com.bo/wp-content/uploads/2022/06/logo-nibol-negro-ok1.png"
-          alt="Nibol"
-          className="mr-4"
-        />
-        <div className="flex text-center">
-          <p className="text-lg font-bold">Control Inventario con QR</p>
-        </div>
-      </div>
-      <div className="flex h-screen w-screen items-center justify-center">
+
+      <div className="flex  w-screen  mt-10 justify-center">
         <div className="flex flex-col space-y-4 items-center">
-          {" "}
-          {/* Contenedor para alinear botones en columna y centrar */}
+        <p><strong>Control Inventario con QR </strong></p>
+
           <Button
             onClick={() => {
               router.push("/generateQr");
