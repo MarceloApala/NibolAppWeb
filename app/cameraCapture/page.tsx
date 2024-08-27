@@ -16,6 +16,8 @@ const QRCodeScanner: React.FC = () => {
   const [inputValue, setInputValue] = useState<string>("");
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const webcamRef = useRef<Webcam | null>(null);
 
   const capture = useCallback(() => {
@@ -69,6 +71,9 @@ const QRCodeScanner: React.FC = () => {
 
   const handleSave = () => {
     if (latitude && longitude) {
+      setIsSaving(true);
+      setSaveMessage(null); // Reset message
+
       const currentDate = new Date();
       const fecha_sistema = currentDate.toISOString().split("T")[0]; // Solo la fecha en formato YYYY-MM-DD
       const hora_sistema = currentDate.toTimeString().split(" ")[0]; // Hora en formato HH:MM:SS
@@ -81,22 +86,27 @@ const QRCodeScanner: React.FC = () => {
         chasis: inputValue,
       };
 
-      fetch("https://apprest3.onrender.com/api/ubicacion", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      })
-        .then((response) => response.json())
-        .then((result) => {
-          console.log("Datos guardados exitosamente:", result);
-          alert("Datos guardados exitosamente.");
+      setTimeout(() => {
+        fetch("https://apprest3.onrender.com/api/ubicacion", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
         })
-        .catch((error) => {
-          console.error("Error al guardar los datos:", error);
-          alert("Error al intentar guardar los datos.");
-        });
+          .then((response) => response.json())
+          .then((result) => {
+            console.log("Datos guardados exitosamente:", result);
+            setSaveMessage("Datos guardados exitosamente.");
+          })
+          .catch((error) => {
+            console.error("Error al guardar los datos:", error);
+            setSaveMessage("Error al intentar guardar los datos.");
+          })
+          .finally(() => {
+            setIsSaving(false);
+          });
+      }, 2000); // 2 segundos de delay
     } else {
       console.error("No se pudieron obtener las coordenadas.");
       alert("No se pudieron obtener las coordenadas.");
@@ -124,7 +134,7 @@ const QRCodeScanner: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+    <div className="flex flex-col items-center justify-center p-4">
       {cameraActive && (
         <Webcam
           audio={false}
@@ -142,7 +152,7 @@ const QRCodeScanner: React.FC = () => {
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         placeholder="Ingrese el chasis"
-        className="mt-4 p-2 border border-gray-300 rounded"
+        className="mt-4 p-2 border rounded"
       />
       <Button onClick={toggleCamera} className="mt-4">
         {cameraActive ? "Desactivar Cámara" : "Activar Cámara"}
@@ -159,9 +169,15 @@ const QRCodeScanner: React.FC = () => {
         </div>
       )}
 
-      <Button onClick={handleSave} className="mt-4">
-        Guardar
+      <Button onClick={handleSave} className="mt-4" disabled={isSaving}>
+        {isSaving ? "Guardando..." : "Guardar"}
       </Button>
+
+      {saveMessage && (
+        <div className="mt-4">
+          <p>{saveMessage}</p>
+        </div>
+      )}
     </div>
   );
 };

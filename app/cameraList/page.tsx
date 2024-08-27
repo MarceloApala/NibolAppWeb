@@ -146,7 +146,7 @@ const QRCodeScanner: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+    <div className="flex flex-col items-center justify-center p-4">
       <div className="mt-4 w-full max-w-md">
         <h2 className="text-xl font-semibold mb-2">Datos Listados:</h2>
         <ul className="list-disc pl-5">

@@ -11,6 +11,7 @@ export default function GenerateQr() {
   const [qrValue, setQrValue] = useState<string>("");
   const [vehicleData, setVehicleData] = useState<any>(null);
   const printRef = useRef<HTMLDivElement>(null);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const staticVehicleData = {
     make: "Volvo",
@@ -75,61 +76,95 @@ export default function GenerateQr() {
         const pageWidth = 3 * 28.35; // 3 cm en puntos
         const pageHeight = 5 * 28.35; // 5 cm en puntos
         const page = pdfDoc.addPage([pageWidth, pageHeight]);
-  
+
         // Añadir el código QR como imagen
-        const qrCanvas = document.getElementById("qr-canvas") as HTMLCanvasElement;
+        const qrCanvas = document.getElementById(
+          "qr-canvas"
+        ) as HTMLCanvasElement;
         if (!qrCanvas) {
           throw new Error("QR canvas not found");
         }
-        const qrImageData = qrCanvas.toDataURL('image/png');
-        const qrImageDataArrayBuffer = await fetch(qrImageData).then(res => res.arrayBuffer());
+        const qrImageData = qrCanvas.toDataURL("image/png");
+        const qrImageDataArrayBuffer = await fetch(qrImageData).then((res) =>
+          res.arrayBuffer()
+        );
         const qrImage = await pdfDoc.embedPng(qrImageDataArrayBuffer);
-  
+
         // Calcular las dimensiones para el QR (más pequeño para dejar espacio para el texto)
         const qrSize = pageWidth * 0.7; // 70% del ancho de la página
-  
+
         // Posicionar la imagen QR en la parte superior de la página
         const x = (pageWidth - qrSize) / 2; // Centrar horizontalmente
         const y = pageHeight - qrSize - 5; // 5 puntos de margen superior
-  
+
         page.drawImage(qrImage, {
           x,
           y,
           width: qrSize,
           height: qrSize,
         });
-  
+
         // Añadir datos de texto debajo de la imagen QR
         const fontSize = 6; // Reducir tamaño de fuente para que quepa
         const textColor = rgb(0, 0, 0); // Negro
         const textY = y - 10; // 10 puntos debajo de la imagen QR
         const lineHeight = 8;
-  
-        page.drawText(`Chasis: ${chasis}`, { x: 5, y: textY, size: fontSize, color: textColor });
-        page.drawText(`Make: ${vehicleData.make}`, { x: 5, y: textY - lineHeight, size: fontSize, color: textColor });
-        page.drawText(`Model: ${vehicleData.model}`, { x: 5, y: textY - 2 * lineHeight, size: fontSize, color: textColor });
-        page.drawText(`Year: ${vehicleData.year}`, { x: 5, y: textY - 3 * lineHeight, size: fontSize, color: textColor });
-        page.drawText(`Color: ${vehicleData.color}`, { x: 5, y: textY - 4 * lineHeight, size: fontSize, color: textColor });
-        page.drawText(`Trans: ${vehicleData.transmission}`, { x: 5, y: textY - 5 * lineHeight, size: fontSize, color: textColor });
-  
+
+        page.drawText(`Chasis: ${chasis}`, {
+          x: 5,
+          y: textY,
+          size: fontSize,
+          color: textColor,
+        });
+        page.drawText(`Make: ${vehicleData.make}`, {
+          x: 5,
+          y: textY - lineHeight,
+          size: fontSize,
+          color: textColor,
+        });
+        page.drawText(`Model: ${vehicleData.model}`, {
+          x: 5,
+          y: textY - 2 * lineHeight,
+          size: fontSize,
+          color: textColor,
+        });
+        page.drawText(`Year: ${vehicleData.year}`, {
+          x: 5,
+          y: textY - 3 * lineHeight,
+          size: fontSize,
+          color: textColor,
+        });
+        page.drawText(`Color: ${vehicleData.color}`, {
+          x: 5,
+          y: textY - 4 * lineHeight,
+          size: fontSize,
+          color: textColor,
+        });
+        page.drawText(`Trans: ${vehicleData.transmission}`, {
+          x: 5,
+          y: textY - 5 * lineHeight,
+          size: fontSize,
+          color: textColor,
+        });
+
         // Serializar el documento PDF a bytes
         const pdfBytes = await pdfDoc.save();
-  
+
         // Crear un blob y descargar el PDF
-        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const blob = new Blob([pdfBytes], { type: "application/pdf" });
         const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = url;
-        link.download = 'qr-code-and-data.pdf';
+        link.download = "qr-code-and-data.pdf";
         link.click();
-  
+
         // Limpieza
         URL.revokeObjectURL(url);
       } catch (error) {
-        console.error('Error generando PDF:', error);
+        console.error("Error generando PDF:", error);
       }
     } else {
-      console.error('printRef or vehicleData is null');
+      console.error("printRef or vehicleData is null");
     }
   };
   const handleSearch = () => {
@@ -138,7 +173,9 @@ export default function GenerateQr() {
 
   return (
     <div className="flex flex-col items-center mt-10">
-      <p className="mb-4"><strong>Generar QR</strong></p>
+      <p className="mb-4">
+        <strong>Generar QR</strong>
+      </p>
       <div className="flex mb-4">
         <Input
           value={chasis}
@@ -171,8 +208,8 @@ export default function GenerateQr() {
             style={{ display: "block" }} // Ensure QR is visible
           />
           <div className="flex mb-4">
-            <Button onClick={handleSave} className="mt-4">
-              Guardar QR
+            <Button onClick={handleSave} disabled={isSaving} className="mt-4">
+              {isSaving ? "Guardando..." : "Guardar QR"}
             </Button>
             <Button onClick={handlePrint} className="mt-4 ml-2">
               Imprimir
